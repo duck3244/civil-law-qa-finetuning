@@ -1,0 +1,89 @@
+sequenceDiagram
+    participant U as User
+    participant M as Main
+    participant DL as CivilLawDataLoader
+    participant DF as DataFormatter
+    participant MM as ModelManager
+    participant TM as TrainerManager
+    participant IE as InferenceEngine
+
+    %% Training Process
+    U->>M: python main.py --mode train
+    
+    Note over M: 1. Data Loading Phase
+    M->>DL: load_dataset()
+    DL->>DL: CSV file loading with encoding detection
+    DL->>DL: analyze_dataset() - statistics generation
+    DL-->>M: DataFrame with stats
+    
+    M->>DL: preprocess_data()
+    DL->>DL: remove null values, duplicates
+    DL->>DL: filter by category/difficulty
+    DL-->>M: Cleaned DataFrame
+    
+    Note over M: 2. Data Formatting Phase
+    M->>DF: stratified_split_by_category()
+    DF->>DF: Split data by categories evenly
+    DF-->>M: train_df, eval_df
+    
+    M->>DF: to_conversational_format()
+    DF->>DF: Create system prompts by category
+    DF->>DF: Format as {"messages": [...]}
+    DF-->>M: train_dataset, eval_dataset
+    
+    Note over M: 3. Model Setup Phase
+    M->>MM: load_model_and_tokenizer()
+    MM->>MM: Load base model with quantization
+    MM->>MM: Setup chat format
+    MM-->>M: model, tokenizer
+    
+    M->>MM: setup_lora_config()
+    MM->>MM: Configure LoRA parameters
+    MM-->>M: peft_config
+    
+    M->>MM: apply_lora()
+    MM->>MM: Apply LoRA to model
+    MM-->>M: lora_model
+    
+    Note over M: 4. Training Configuration Phase
+    M->>TM: create_training_config_from_preset()
+    TM->>TM: Load preset configuration
+    TM->>TM: Apply user overrides
+    TM-->>M: training_args
+    
+    M->>TM: estimate_training_time()
+    TM->>TM: Calculate estimated time
+    TM-->>M: time_estimate
+    
+    Note over M: 5. Training Phase
+    M->>TM: create_trainer()
+    TM->>TM: Initialize SFTTrainer
+    TM-->>M: trainer
+    
+    M->>TM: train()
+    TM->>TM: Execute fine-tuning
+    Note over TM: Training with evaluation steps
+    TM-->>M: training_result
+    
+    Note over M: 6. Model Saving Phase
+    M->>TM: save_model()
+    TM->>TM: Save LoRA adapters
+    TM->>TM: Save tokenizer
+    TM-->>M: model_path
+    
+    M->>TM: save_training_info()
+    TM->>TM: Save training statistics
+    TM-->>M: info_path
+    
+    Note over M: 7. Post-training Test Phase
+    M->>IE: InferenceEngine(model, tokenizer)
+    M->>IE: run_comprehensive_test()
+    IE->>IE: Execute test cases
+    IE->>IE: Calculate performance metrics
+    IE-->>M: test_results
+    
+    M->>IE: save_test_results()
+    IE->>IE: Save results to JSON
+    IE-->>M: test_file_path
+    
+    M-->>U: Training completed successfully

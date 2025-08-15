@@ -1,0 +1,84 @@
+flowchart TB
+    %% Actors
+    DEV[👨‍💻 Developer]
+    RESEARCHER[🔬 Researcher]
+    USER[👤 End User]
+    SYSTEM[🤖 System]
+
+    %% Training Use Cases
+    subgraph TRAINING[🎯 Training Use Cases]
+        UC1[Train Model<br/>Load dataset<br/>Configure training<br/>Execute fine-tuning<br/>Save model]
+        UC2[Preprocess Data<br/>Clean data<br/>Filter categories<br/>Split train/eval<br/>Validate format]
+        UC3[Configure Model<br/>Set LoRA parameters<br/>Apply quantization<br/>Optimize memory<br/>Select preset]
+    end
+
+    %% Inference Use Cases
+    subgraph INFERENCE[💬 Inference Use Cases]
+        UC4[Generate Answers<br/>Process questions<br/>Apply category context<br/>Return legal advice<br/>Track performance]
+        UC5[Interactive Chat<br/>Real-time conversation<br/>Context awareness<br/>Category switching<br/>History tracking]
+        UC6[Batch Processing<br/>Multiple questions<br/>Parallel processing<br/>Result aggregation<br/>Performance metrics]
+    end
+
+    %% Testing Use Cases
+    subgraph TESTING[🧪 Testing Use Cases]
+        UC7[Run Tests<br/>Execute test cases<br/>Measure accuracy<br/>Performance benchmarks<br/>Generate reports]
+        UC8[Evaluate Model<br/>Quality assessment<br/>Speed benchmarks<br/>Memory usage<br/>Comparative analysis]
+        UC9[Monitor Performance<br/>Real-time metrics<br/>Resource usage<br/>Error tracking<br/>Usage statistics]
+    end
+
+    %% Data Management Use Cases
+    subgraph DATAMGMT[📊 Data Management]
+        UC10[Load Dataset<br/>CSV parsing<br/>Encoding detection<br/>Data validation<br/>Statistics generation]
+        UC11[Format Data<br/>Structure conversion<br/>Prompt engineering<br/>Category mapping<br/>Quality checks]
+        UC12[Export Results<br/>Save configurations<br/>Export test results<br/>Generate reports<br/>Create backups]
+    end
+
+    %% Actor to Use Case Relationships
+    DEV --> UC1
+    DEV --> UC2
+    DEV --> UC3
+    DEV --> UC7
+    DEV --> UC8
+    DEV --> UC10
+    DEV --> UC11
+    DEV --> UC12
+
+    RESEARCHER --> UC1
+    RESEARCHER --> UC7
+    RESEARCHER --> UC8
+    RESEARCHER --> UC9
+    RESEARCHER --> UC12
+
+    USER --> UC4
+    USER --> UC5
+    USER --> UC6
+
+    SYSTEM --> UC9
+    SYSTEM --> UC12
+
+    %% Use Case Dependencies
+    UC1 -.-> UC2
+    UC1 -.-> UC3
+    UC1 -.-> UC10
+    
+    UC4 -.-> UC11
+    UC5 -.-> UC4
+    UC6 -.-> UC4
+    
+    UC7 -.-> UC4
+    UC7 -.-> UC12
+    UC8 -.-> UC7
+    UC8 -.-> UC9
+
+    %% Styling
+    classDef actor fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000
+    classDef training fill:#fff8e1,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef inference fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef testing fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px,color:#000
+    classDef data fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000
+
+    class DEV,RESEARCHER,USER,SYSTEM actor
+    class UC1,UC2,UC3 training
+    class UC4,UC5,UC6 inference
+    class UC7,UC8,UC9 testing
+    class UC10,UC11,UC12 data

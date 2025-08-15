@@ -1,0 +1,155 @@
+classDiagram
+    %% Main Controller
+    class Main {
+        +main()
+        +run_training(args)
+        +run_inference(args)
+        +run_testing(args)
+        +run_interactive(args)
+        +print_usage_examples()
+    }
+
+    %% Data Layer
+    class CivilLawDataLoader {
+        -filename: str
+        -df: DataFrame
+        -stats: dict
+        +__init__(filename)
+        +load_dataset() DataFrame
+        +preprocess_data() DataFrame
+        +filter_by_category(categories) DataFrame
+        +filter_by_difficulty(difficulties) DataFrame
+        +split_by_category() dict
+        +get_stats() dict
+        +save_stats(output_path)
+        -_analyze_dataset()
+        -_analyze_text_length()
+        -_show_samples(num_samples)
+    }
+
+    class DataFormatter {
+        -system_prompts: dict
+        +__init__()
+        +to_conversational_format(df, include_category, include_difficulty) Dataset
+        +to_instruction_format(df, include_category) Dataset
+        +to_custom_format(df, template) Dataset
+        +create_formatting_func(template_type) function
+        +split_train_eval(dataset, test_size, seed) tuple
+        +stratified_split_by_category(df, test_size, seed) tuple
+        +create_category_datasets(df) dict
+        +validate_format(dataset, format_type) bool
+        -_default_template(row) str
+        -_simple_split(df, test_size, seed) tuple
+        -_calculate_similarity(generated, expected) float
+    }
+
+    %% Model Layer
+    class ModelManager {
+        -model_name: str
+        -model: PreTrainedModel
+        -tokenizer: PreTrainedTokenizer
+        -peft_config: LoraConfig
+        -model_info: dict
+        +__init__(model_name)
+        +load_model_and_tokenizer(**kwargs) tuple
+        +setup_lora_config(**kwargs) LoraConfig
+        +apply_lora() PreTrainedModel
+        +get_model_size_info() dict
+        +save_model_config(output_dir) str
+        +load_finetuned_model(model_path) tuple
+        +prepare_for_training() tuple
+        +get_memory_usage() dict
+        -_collect_model_info()
+    }
+
+    %% Training Layer
+    class TrainerManager {
+        -output_dir: str
+        -training_args: SFTConfig
+        -trainer: SFTTrainer
+        -training_history: list
+        +__init__(output_dir)
+        +create_training_config(**kwargs) SFTConfig
+        +create_trainer(model, train_dataset, eval_dataset, peft_config, tokenizer, formatting_func) SFTTrainer
+        +train() TrainingResult
+        +save_model() str
+        +save_training_info(dataset_stats, model_info) str
+        +get_training_config_preset(preset) dict
+        +create_training_config_from_preset(preset, **kwargs) SFTConfig
+        +estimate_training_time(dataset_size, preset) dict
+    }
+
+    %% Inference Layer
+    class InferenceEngine {
+        -model: PreTrainedModel
+        -tokenizer: PreTrainedTokenizer
+        -generation_config: dict
+        -system_prompts: dict
+        +__init__(model, tokenizer)
+        +load_finetuned_model(model_path, base_model_name) tuple
+        +generate_answer(question, category, **kwargs) dict
+        +batch_generate(questions, categories, **kwargs) dict
+        +interactive_chat() list
+        +evaluate_on_test_cases(test_cases) list
+        +run_comprehensive_test() dict
+        +save_test_results(results, output_path) str
+        +benchmark_generation_speed(num_tests) dict
+        +update_generation_config(**kwargs)
+        +get_model_info() dict
+        +get_default_test_cases() list
+        -_get_default_generation_config() dict
+        -_get_system_prompts() dict
+        -_calculate_similarity(generated, expected) float
+    }
+
+    %% External Dependencies
+    class HuggingFaceLibraries {
+        <<external>>
+        +AutoModelForCausalLM
+        +AutoTokenizer
+        +Dataset
+        +SFTConfig
+        +SFTTrainer
+        +LoraConfig
+        +PeftModel
+    }
+
+    class TorchLibraries {
+        <<external>>
+        +torch
+        +torch.cuda
+    }
+
+    class DataLibraries {
+        <<external>>
+        +pandas
+        +json
+        +csv
+    }
+
+    %% Relationships
+    Main --> CivilLawDataLoader : uses
+    Main --> DataFormatter : uses
+    Main --> ModelManager : uses
+    Main --> TrainerManager : uses
+    Main --> InferenceEngine : uses
+
+    CivilLawDataLoader --> DataLibraries : depends on
+    DataFormatter --> HuggingFaceLibraries : depends on
+    ModelManager --> HuggingFaceLibraries : depends on
+    ModelManager --> TorchLibraries : depends on
+    TrainerManager --> HuggingFaceLibraries : depends on
+    InferenceEngine --> HuggingFaceLibraries : depends on
+    InferenceEngine --> TorchLibraries : depends on
+
+    %% Data Flow
+    CivilLawDataLoader --> DataFormatter : DataFrame
+    DataFormatter --> TrainerManager : Dataset
+    ModelManager --> TrainerManager : Model, Tokenizer
+    TrainerManager --> InferenceEngine : Trained Model
+    ModelManager --> InferenceEngine : Model, Tokenizer
+
+    %% Composition relationships
+    TrainerManager *-- "1" SFTConfig : contains
+    ModelManager *-- "1" LoraConfig : contains
+    InferenceEngine *-- "1..n" TestCase : contains

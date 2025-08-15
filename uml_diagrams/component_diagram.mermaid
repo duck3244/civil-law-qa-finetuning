@@ -1,0 +1,87 @@
+graph TB
+    %% User Interface Layer
+    subgraph UI ["🖥️ User Interface Layer"]
+        CLI["Command Line Interface<br/>• Training mode<br/>• Inference mode<br/>• Test mode<br/>• Interactive mode"]
+    end
+
+    %% Application Layer
+    subgraph APP ["🚀 Application Layer"]
+        MAIN["Main Controller<br/>• Workflow orchestration<br/>• Mode selection<br/>• Error handling<br/>• Usage examples"]
+    end
+
+    %% Business Logic Layer
+    subgraph BL ["⚙️ Business Logic Layer"]
+        DL["Data Loader<br/>• CSV file loading<br/>• Data validation<br/>• Statistics generation<br/>• Category filtering"]
+
+        DF["Data Formatter<br/>• Format conversion<br/>• System prompt generation<br/>• Data splitting<br/>• Validation"]
+
+        MM["Model Manager<br/>• Model loading<br/>• LoRA configuration<br/>• Memory optimization<br/>• Model serialization"]
+
+        TM["Trainer Manager<br/>• Training configuration<br/>• SFT training<br/>• Preset management<br/>• Progress tracking"]
+
+        IE["Inference Engine<br/>• Answer generation<br/>• Interactive chat<br/>• Performance testing<br/>• Batch processing"]
+    end
+
+    %% Data Layer
+    subgraph DATA ["💾 Data Layer"]
+        CSV["CSV Dataset<br/>civil_law_qa_dataset.csv<br/>• Questions & Answers<br/>• Categories<br/>• Difficulty levels"]
+
+        JSON["Configuration Files<br/>• Training configs<br/>• Model metadata<br/>• Test results<br/>• Statistics"]
+
+        MODEL["Model Artifacts<br/>• LoRA adapters<br/>• Tokenizer files<br/>• Training checkpoints"]
+    end
+
+    %% External Dependencies
+    subgraph EXT ["📦 External Libraries"]
+        HF["🤗 Hugging Face<br/>• transformers<br/>• datasets<br/>• trl SFTTrainer<br/>• peft LoRA"]
+
+        TORCH["🔥 PyTorch<br/>• torch<br/>• CUDA support<br/>• Memory management"]
+
+        UTILS["🛠️ Utilities<br/>• pandas<br/>• numpy<br/>• json<br/>• argparse"]
+    end
+
+    %% Connections - User Interface
+    CLI --> MAIN
+
+    %% Connections - Application to Business Logic
+    MAIN --> DL
+    MAIN --> DF
+    MAIN --> MM
+    MAIN --> TM
+    MAIN --> IE
+
+    %% Connections - Business Logic Internal
+    DL --> DF
+    DF --> TM
+    MM --> TM
+    TM --> IE
+    MM --> IE
+
+    %% Connections - Data Layer
+    DL -.-> CSV
+    TM -.-> JSON
+    IE -.-> JSON
+    MM -.-> MODEL
+    TM -.-> MODEL
+
+    %% Connections - External Dependencies
+    DL --> UTILS
+    DF --> HF
+    MM --> HF
+    MM --> TORCH
+    TM --> HF
+    IE --> HF
+    IE --> TORCH
+
+    %% Styling
+    classDef uiLayer fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef appLayer fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef businessLayer fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef dataLayer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef externalLayer fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    class CLI uiLayer
+    class MAIN appLayer
+    class DL,DF,MM,TM,IE businessLayer
+    class CSV,JSON,MODEL dataLayer
+    class HF,TORCH,UTILS externalLayer
