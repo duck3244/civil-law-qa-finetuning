@@ -31,10 +31,6 @@
 ### 1. 환경 설정
 
 ```bash
-# 저장소 클론
-git clone <repository-url>
-cd civil-law-qa-finetuning
-
 # 가상환경 생성 (권장)
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -293,3 +289,4 @@ print(manager.get_memory_usage())
 - [TRL (Transformer Reinforcement Learning)](https://github.com/huggingface/trl)
 - [PEFT (Parameter Efficient Fine-tuning)](https://github.com/huggingface/peft)
 - [Transformers](https://github.com/huggingface/transformers)
+---
